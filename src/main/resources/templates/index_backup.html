@@ -1,0 +1,211 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>短网址首页</title>
+    <link th:href="@{js/layui/css/layui.css}" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f2f2f2;
+        }
+
+        .container{
+            width:45%;
+            height:fit-content;
+            position:absolute;
+            top:0;
+            left:0;
+            right:0;
+            bottom:0;
+            margin:auto;
+            display: flex;
+            flex-flow: column;
+            justify-content: center;
+        }
+        .inputArea {
+            height: 110px;
+            line-height: 90px;
+            box-shadow: #bbbbbb 1px 1px 10px;
+            margin-top:10px;
+        }
+
+        .tab {
+            margin: 0 auto;
+            height: 40px;
+            line-height: 40px;
+        }
+
+        .tab div {
+            width: fit-content;
+            background: #fff;
+            padding-left: 10px;
+            padding-right: 10px;
+            box-shadow: #bbbbbb 1px 1px 10px;
+        }
+
+        .inputBox {
+            height: 90px;
+            line-height: 90px;
+            margin: 0 auto;
+            display: flex;
+            flex-flow: row;
+            justify-content: center;
+            align-items: center;
+            background: #fff;
+        }
+
+        .inputBox input {
+            border: 1px solid #bbb;
+            font-size: 20px;
+            color: #333;
+            text-indent: 0.3em;
+            height: 40px;
+            width: 95%;
+        }
+
+        .inputBox input::-webkit-input-placeholder {
+            color: #518b5f;
+        }
+
+        .inputBox input::-moz-placeholder {
+            color: #518b5f;
+        }
+
+        .inputBox input:-moz-placeholder {
+            color: #518b5f;
+        }
+
+        .inputBox input:-ms-input-placeholder {
+            color: #518b5f;
+        }
+
+        .inputBox input:focus {
+            color: #518b5f;
+            outline: 1px solid #518b5f;
+        }
+
+        .inputBox .button {
+            width: 5%;
+            text-align: center;
+            height: 40px;
+            line-height: 40px;
+            color: #fff;
+            background: #518b5f;
+            border: 1px solid #bbb;
+        }
+
+        .resultBox {
+            padding: 10px 0 10px 0;
+            margin: 0 auto;
+            height: 176px;
+            background: #fff;
+            line-height: 176px;
+            display: flex;
+            flex-flow: row;
+            justify-content: space-evenly;
+        }
+
+        .linkBox {
+            margin-left: 10px;
+        }
+
+        .toolbarBox {
+            background: #fff;
+            height: 50px;
+            line-height: 50px;
+            border-top: 1px solid #f2f2f2;
+        }
+
+        select {
+            width: 123px;
+            height: 30px;
+        }
+    </style>
+
+    <script th:src="@{js/jquery.min.js}"></script>
+    <script th:src="@{js/jquery.qrcode.js}"></script>
+    <script th:src="@{js/qrcode.js}"></script>
+</head>
+<body>
+
+<ul>
+
+</ul>
+<div class="container">
+    <div class="tab">
+        <div>缩短网址</div>
+    </div>
+    <div class="inputArea">
+        <div class="inputBox">
+            <label for="linkInput"></label><input id="linkInput" placeholder="请输入你要转换的长链接，回车进行转换"/>
+        </div>
+        <div class="toolbarBox">
+            <div>
+                <label>有效时间</label>
+                <label>
+                    <select>
+                        <option value="7">7天</option>
+                        <option value="30">30天</option>
+                        <option value="1">永久</option>
+                    </select>
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="resultBox">
+        <div id="qrcode"></div>
+        <div class="linkBox">
+        </div>
+    </div>
+</div>
+
+<script th:src="@{js/layui/layui.js}"></script>
+<script>
+
+    $(".resultBox").hide();
+
+    let context = "";
+    /*<![CDATA[*/
+    context = /*[[@{/}]]*/ '';
+    /*]]>*/
+
+    $("input").keydown(function (e) {
+        if (e.keyCode === 13) {
+            let timestamp = new Date().getTime();
+            let link = $("#linkInput").val();
+            $.ajax({
+                url: link,
+                type: 'get',
+                dataType: "jsonp",
+                complete: function (res) {
+                    if (res.status === 200) {
+                        $.ajax({
+                            url: context + '/link/convert',
+                            data: {link: link, timestamp: timestamp},
+                            success: function (res) {
+                                $(".resultBox").show();
+                                $(".inputArea").css("border", "2px solid #f2f2f2");
+                                $(".linkBox").html("<a target='_blank' href='" + res + "'>" + res + "</a>");
+                                let qrcode = $("#qrcode");
+                                qrcode.html("");
+                                qrcode.qrcode({
+                                    text: res,
+                                    width: 176,
+                                    height: 176
+                                })
+                            }
+                        })
+                    } else {
+                        alert("当前长链接错误，请输入正确的长链接！");
+                    }
+                }
+            })
+
+        }
+    })
+</script>
+<script>
+</script>
+</body>
+</html>
